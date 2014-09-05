@@ -80,3 +80,9 @@
   (flush_all [this])
   (quit [this])
   )
+
+(defmacro with-client
+  "Evalutes body in the context of a thread-bound client to a memcached server."
+  [client & body]
+  `(binding [*memcached-client* ~client]
+     ~@body))

@@ -13,4 +13,18 @@
             (.update b))]
     (.getValue c)))
 
-(defrecord Host [host])
+; TODO
+(defn socket-factory
+  "Parse the connection string.
+
+  Support:
+
+  * unix://abolute/path
+  * inet6://host:port
+  * inet://host:port
+  * host:port
+
+  default port: 11211"
+  [connection-string]
+  (Socket. "localhost" 11211))
+

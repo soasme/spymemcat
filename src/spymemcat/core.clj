@@ -70,4 +70,13 @@
   ; Touch
   (defn touch [this key exptime]
     "update the expiration time of an existing item without fetching it")
+
+  ; Statistic
+  (defn stats
+    "query the server about statistics it maintains and other internal data.")
+
+  ; Others
+  (defn version)
+  (defn flush_all)
+  (defn quit)
   )

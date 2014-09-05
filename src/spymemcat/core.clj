@@ -43,40 +43,40 @@
 
 (defprotocol Memcached
   ; Retrieval commands (2)
-  (defn get [this key])
-  (defn gets [this key])
+  (get [this key])
+  (gets [this key])
 
   ; Storage commands (6)
-  (defn set [this key value]
+  (set [this key value]
     "store this data")
-  (defn add [this key value]
+  (add [this key value]
     "store this data, but only if the server *doesn't* already hold value for this key")
-  (defn replace [this key value]
+  (replace [this key value]
     "store this data, but only if the server *does* already hold data for this key")
-  (defn append [this key value]
+  (append [this key value]
     "add this data to an existing key after existing data")
-  (defn prepend [this key value]
+  (prepend [this key value]
     "add this data to an existing key before existing data")
-  (defn cas [this key value]
+  (cas [this key value]
     "store this data but only if no one else has updated since I last fetched it.")
 
   ; Deletion
-  (defn delete [this key])
+  (delete [this key])
 
   ; Increment/Decrement
-  (defn incr [this key step])
-  (defn decr [this key step])
+  (incr [this key step])
+  (decr [this key step])
 
   ; Touch
-  (defn touch [this key exptime]
+  (touch [this key exptime]
     "update the expiration time of an existing item without fetching it")
 
   ; Statistic
-  (defn stats
+  (stats [this]
     "query the server about statistics it maintains and other internal data.")
 
   ; Others
-  (defn version)
-  (defn flush_all)
-  (defn quit)
+  (version [this])
+  (flush_all [this])
+  (quit [this])
   )

@@ -81,8 +81,28 @@
   (quit [this])
   )
 
+(def ^:dynamic *memcached-client* nil)
+(def no-client-error
+  (Exception. "Please put commands under `with-client`."))
+
 (defmacro with-client
-  "Evalutes body in the context of a thread-bound client to a memcached server."
+  "Evalute body in the context of a thread-bound client to a memcached server."
   [client & body]
   `(binding [*memcached-client* ~client]
      ~@body))
+
+(defn client
+  "Return current thread-bound memcached client."
+  []
+  (deref (or *memcached-client*
+             (throw no-client-error))))
+
+(defn get
+  ([key]
+   (-> (client)
+       (get key)))
+  ([key & rest]
+   (-> (client)
+       (get (list* key rest)))))
+
+

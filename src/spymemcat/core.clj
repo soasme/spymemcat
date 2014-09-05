@@ -3,7 +3,10 @@
            [java.io IOException DataInputStream DataOutputStream]
            [java.util.regex Pattern]
            [java.util.zip CRC32]
-           [java.security NoSuchAlgorithmException MessageDigest]))
+           [java.security NoSuchAlgorithmException MessageDigest]
+           [java.net InetSocketAddress]
+           [net.spy.memcached MemcachedClient BinaryConnectionFactory AddrUtil])
+  (:require [clojure.string :as str]))
 
 (defn- server-hash
   "Get hash for key"
@@ -13,23 +16,14 @@
             (.update b))]
     (.getValue c)))
 
-; TODO
-(defn socket-factory
-  "Parse the connection string.
-
-  Support:
-
-  * unix://abolute/path
-  * inet6://host:port
-  * inet://host:port
-  * host:port
-
-  default port: 11211"
-  [connection-string]
-  (Socket. "localhost" 11211))
-
 (defn client-factory
-  [& connection-strings])
+  "Split a string in the form of `host:port host2:port` into a List
+  of InetSocketAddress instances suitable for instantiating a
+  MemcachedClient. Note that colon-delimited IPv6 is also supported."
+  [connection-strings]
+  (MemcachedClient.
+   (BinaryConnectionFactory.)
+   (AddrUtil/getAddresses connection-strings)))
 
 (defn send-cmd
   "Sending cmd[1] to memcached via Socket.
@@ -104,5 +98,3 @@
   ([key & rest]
    (-> (client)
        (get (list* key rest)))))
-
-

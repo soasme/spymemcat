@@ -21,9 +21,9 @@
   of InetSocketAddress instances suitable for instantiating a
   MemcachedClient. Note that colon-delimited IPv6 is also supported."
   [connection-strings]
-  (MemcachedClient.
+  (delay (MemcachedClient.
    (BinaryConnectionFactory.)
-   (AddrUtil/getAddresses connection-strings)))
+   (AddrUtil/getAddresses connection-strings))))
 
 (defn send-cmd
   "Sending cmd[1] to memcached via Socket.
@@ -35,46 +35,6 @@
 (declare client-error-string)
 (declare server-error-string)
 
-(defprotocol Memcached
-  ; Retrieval commands (2)
-  (get [this key])
-  (gets [this key])
-
-  ; Storage commands (6)
-  (set [this key value]
-    "store this data")
-  (add [this key value]
-    "store this data, but only if the server *doesn't* already hold value for this key")
-  (replace [this key value]
-    "store this data, but only if the server *does* already hold data for this key")
-  (append [this key value]
-    "add this data to an existing key after existing data")
-  (prepend [this key value]
-    "add this data to an existing key before existing data")
-  (cas [this key value]
-    "store this data but only if no one else has updated since I last fetched it.")
-
-  ; Deletion
-  (delete [this key])
-
-  ; Increment/Decrement
-  (incr [this key step])
-  (decr [this key step])
-
-  ; Touch
-  (touch [this key exptime]
-    "update the expiration time of an existing item without fetching it")
-
-  ; Statistic
-  (stats [this]
-    "query the server about statistics it maintains and other internal data.")
-
-  ; Others
-  (version [this])
-  (flush_all [this])
-  (quit [this])
-  )
-
 (def ^:dynamic *memcached-client* nil)
 (def no-client-error
   (Exception. "Please put commands under `with-client`."))
@@ -85,7 +45,7 @@
   `(binding [*memcached-client* ~client]
      ~@body))
 
-(defn client
+(defn- client
   "Return current thread-bound memcached client."
   []
   (deref (or *memcached-client*
@@ -93,8 +53,14 @@
 
 (defn get
   ([key]
-   (-> (client)
-       (get key)))
+   (.get (client) key))
   ([key & rest]
-   (-> (client)
-       (get (list* key rest)))))
+   (.get (client) (list* key rest))))
+
+(defn set
+  ([key value expiration]
+   (.set (client) key expiration value)))
+
+;; (with-client (client-factory "localhost:11211")
+;;   (set "test" 1 3600)
+;;   (get "test"))

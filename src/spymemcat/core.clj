@@ -57,10 +57,21 @@
   ([key & rest]
    (.get (client) (list* key rest))))
 
+(defn- cas-value-parser
+  [cas-value]
+  {:value (.getValue cas-value)
+   :cas (.getCas cas-value)})
+
+(defn gets
+  [key]
+  (-> (.gets (client) key)
+      cas-value-parser))
+
 (defn set
   ([key value expiration]
    (.set (client) key expiration value)))
 
-;; (with-client (client-factory "localhost:11211")
-;;   (set "test" 1 3600)
-;;   (get "test"))
+ (with-client (client-factory "localhost:11211")
+   (set "test" 1 3600)
+   (get "test")
+   (gets "test"))

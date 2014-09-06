@@ -67,11 +67,17 @@
   (-> (.gets (client) key)
       cas-value-parser))
 
+(defn get-multi
+  [coll]
+  (into {} (.getBulk (client) coll)))
+
 (defn set
   ([key value expiration]
    (.set (client) key expiration value)))
 
  (with-client (client-factory "localhost:11211")
    (set "test" 1 3600)
-   (get "test")
-   (gets "test"))
+   (get "test") ;= 1
+   (gets "test") ;= {:value 1, :cas 54}
+   (get-multi ["test"]) ;= {"test" 1}
+   )

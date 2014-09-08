@@ -8,11 +8,10 @@
 
 (defn test-client-fixture
   [f]
-  (do ; H...
-    (with-client (client-factory "localhost:11211")
-      (try
-        (f)
-        (finally (spy/flush))))))
+  (with-client (client-factory "localhost:11211")
+    (try
+      (f)
+      (finally (spy/flush)))))
 
 (clojure.test/use-fixtures :once test-client-fixture)
 

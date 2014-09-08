@@ -12,6 +12,8 @@ To use spymemcat, put dependency to `project.clj`:
 ## Basic Usage
 
 ```clojure
+
+(use 'spymemcat.core)
 (with-client (client-factory "localhost:11211")
   (set "test" 1 3600)
   (get "test"))

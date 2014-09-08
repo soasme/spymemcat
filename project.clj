@@ -1,4 +1,4 @@
-(defproject spymemcat "0.1.0-SNAPSHOT"
+(defproject spymemcat "0.1.0"
   :description "A Clojure client for memcached"
   :url "http://github.com/soasme/spymemcat"
   :license {:name "Eclipse Public License"

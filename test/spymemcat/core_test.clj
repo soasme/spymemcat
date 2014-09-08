@@ -1,7 +1,10 @@
 (ns spymemcat.core-test
   (:require [clojure.test :refer :all]
             [spymemcat.core :refer :all :as spy]
-            ))
+            )
+  (:import java.util.UUID))
+
+(defn gen-key [] (str (UUID/randomUUID)))
 
 (defn test-client-fixture
   [f]
@@ -32,7 +35,8 @@
       (is (nil? (get key))))))
 
 (deftest test-incr-decr
-  (testing "INCR / DECR"
-    (let [key (str (gensym))]
-      (is (= 0 (incr key 1)))
-      (is (= 1 (incr key 1))))))
+  (testing "a case when a value is not initialized and does not exist"
+    (is (= -1 (incr (gen-key) 1))))
+  (testing "a case when a value initialized and does not exist"
+    (is (= 1 (incr (gen-key) 1 1))))
+  )

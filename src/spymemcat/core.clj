@@ -6,7 +6,7 @@
            [java.security NoSuchAlgorithmException MessageDigest]
            [java.net InetSocketAddress]
            [net.spy.memcached MemcachedClient BinaryConnectionFactory AddrUtil])
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as string]))
 
 (defn- server-hash
   "Get hash for key"
@@ -15,6 +15,18 @@
         c (doto (CRC32.)
             (.update b))]
     (.getValue c)))
+
+(defn- cas-value-parser
+  [cas-value]
+  {:value (.getValue cas-value)
+   :cas (.getCas cas-value)})
+
+(defn- keywordize
+  [v]
+  (-> v
+      str
+      string/lower-case
+      keyword))
 
 (defn client-factory
   "Split a string in the form of `host:port host2:port` into a List
@@ -51,16 +63,11 @@
   (deref (or *memcached-client*
              (throw no-client-error))))
 
-(defn get
-  ([key]
-   (.get (client) key))
-  ([key & rest]
-   (.get (client) (list* key rest))))
+; Retrieval commands
 
-(defn- cas-value-parser
-  [cas-value]
-  {:value (.getValue cas-value)
-   :cas (.getCas cas-value)})
+(defn get
+  [key]
+  (.get (client) key))
 
 (defn gets
   [key]
@@ -71,13 +78,66 @@
   [coll]
   (into {} (.getBulk (client) coll)))
 
-(defn set
-  ([key value expiration]
-   (.set (client) key expiration value)))
+; Storage commands
+
+(defmacro defstoragecmd
+  [name]
+  `(defn ~name
+     [key# value# expire#]
+     (. (client) ~name key# expire# value#)))
+
+(defmacro defcountercmd
+  [name]
+  `(defn ~name
+     ([key# delta#]
+      (. (client) ~name key# delta#))
+     ([key# delta# default#]
+      (. (client) ~name key# delta# default#))
+     ([key# delta# default# expire#]
+      (. (client) ~name key# delta# default# expire#))))
+
+
+(defstoragecmd set)
+(defstoragecmd add)
+(defstoragecmd replace)
+(defstoragecmd touch)
+
+(defn touch
+  [key expire]
+  (.touch (client) key expire))
+
+(defcountercmd incr)
+(defcountercmd decr)
+
+(defn cas
+  ([key value cas-id]
+   (keywordize (.cas client key cas-id value))))
+
+(defn delete
+  [key]
+  (.delete (client) key))
+
+(defn versions
+  []
+  (.getVersions (client)))
+
+(defn stats
+  ([]
+   (.getStats (client))))
+
+(defn shutdown
+  []
+  (.shutdown (client)))
 
  (with-client (client-factory "localhost:11211")
-   (set "test" 1 3600)
-   (get "test") ;= 1
-   (gets "test") ;= {:value 1, :cas 54}
-   (get-multi ["test"]) ;= {"test" 1}
+;;    (set "test" 1 3600)
+;;    (get "test") ;= 1
+;;    (gets "test") ;= {:value 1, :cas 54}
+;;    (get-multi ["test"]) ;= {"test" 1}
+   (incr "test" 1 0)
+   (get "test")
+   (gets "test")
+   (get-multi ["test"])
+   (versions)
+   (stats)
    )

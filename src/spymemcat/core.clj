@@ -129,15 +129,6 @@
   []
   (.shutdown (client)))
 
- (with-client (client-factory "localhost:11211")
-;;    (set "test" 1 3600)
-;;    (get "test") ;= 1
-;;    (gets "test") ;= {:value 1, :cas 54}
-;;    (get-multi ["test"]) ;= {"test" 1}
-   (incr "test" 1 0)
-   (get "test")
-   (gets "test")
-   (get-multi ["test"])
-   (versions)
-   (stats)
-   )
+(defn flush
+  []
+  (.flush (client)))

@@ -21,7 +21,9 @@ To use spymemcat, put dependency to `project.clj`:
 
 A memcached client using text protocol is default.
 
+```clojure
 (def memcached-client (client-factory "localhost:11211"))
+```
 
 All valid commands should under `with-client` scope:
 
@@ -49,6 +51,7 @@ All valid commands should under `with-client` scope:
   (gets "key2") ;= {:cas 1 :value 1}
   (get-multi ["key1" "key2"]) ;= {"key1" 1 "key2" 1}
   )
+```
 
 ### Delete command
 

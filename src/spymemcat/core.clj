@@ -110,8 +110,8 @@
 (defcountercmd decr)
 
 (defn cas
-  ([key value cas-id]
-   (keywordize (.cas client key cas-id value))))
+  [key value cas-id]
+   (keywordize (.cas client key cas-id value)))
 
 (defn delete
   [key]
